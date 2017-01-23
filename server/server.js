@@ -21,8 +21,8 @@ io.on('connection', (socket) => {
 		cratedAt: 232335
 	});
 
-	socket.emit('createMessage', (msg) => {
-		console.log('Createmessage', msg);
+	socket.on('createMessage', (msg) => {
+		console.log('createMessage', msg);
 	});
 
 	socket.on('disconnect', () => {

@@ -4,8 +4,8 @@ socket.on('connect', function () {
 	console.log('[index.html] Connected to server...');
 
 	socket.emit('createMessage', {
-		from: 'they@example.com',
-		text: 'This is me! Help!'
+		from: 'din@example.com',
+		text: 'This is me! Wzup!'
 	});
 });
 
