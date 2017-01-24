@@ -21,18 +21,15 @@ io.on('connection', (socket) => {
 	
 	socket.broadcast.emit('newUserJoined', generateMessage('Admin', 'New user joined.'));
 
-	socket.on('createMessage', (msg) => {
+	socket.on('createMessage', (msg, cb) => {
 		console.log('createMessage', msg);
 		// socket.emit = emits an event to a single connection
 		// io.emit = emits an event to all connections
 		// broadcast = send message to all but one user
-		// io.emit('newMessage', {
-		// 	from: msg.from,
-		// 	text: msg.text,
-		// 	createdAt: new Date().getTime()
-		// });
-		
-		socket.broadcast.emit('newMessage', generateMessage(msg.from, msg.text));
+		io.emit('newMessage', generateMessage(msg.from, msg.text));
+
+		cb('This is from the server...');
+
 	});
 
 	socket.on('disconnect', () => {
