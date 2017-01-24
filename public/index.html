@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
     <meta charset="UTF-8">
 </head>
@@ -9,14 +7,14 @@
 
 
 
-<p>...</p>
-
 <ol id="messages"></ol>
 
 <div id="message-form">
     <input name="message" type="text" placeholder="Message" v-model="message" @keyup.enter="sendMessage" />
     <button @click="sendMessage">Send</button>
 </div>
+
+<button id="send-location">Send Location</button>
 
 
 
