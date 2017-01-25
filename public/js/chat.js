@@ -15,11 +15,11 @@ function scrollToBottom() {
 }
 
 socket.on('connect', function () {
-	console.log('[index.html] Connected to server...');
+	console.log('[chat.html] Connected to server...');
 });
 
 socket.on('disconnect', function () {
-	console.log('[index.html] Disconnected from server...')
+	console.log('[chat.html] Disconnected from server...')
 });
 
 socket.on('newMessage', function (msg) {
