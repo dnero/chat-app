@@ -1,5 +1,19 @@
 var socket = io();
 
+function scrollToBottom() {
+	var messages = jQuery('#messages'),
+		newMessage = messages.children('li:last-child'),
+		newMessageHeight = newMessage.innerHeight(),
+		lastMessageHeight = newMessage.prev().innerHeight(),
+		clientHeight = messages.prop('clientHeight'),
+		scrollTop = messages.prop('scrollTop'),
+		scrollHeight = messages.prop('scrollHeight');
+
+	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+		messages.scrollTop(scrollHeight);
+	}
+}
+
 socket.on('connect', function () {
 	console.log('[index.html] Connected to server...');
 });
@@ -18,27 +32,20 @@ socket.on('newMessage', function (msg) {
 	});
 	
 	jQuery('#messages').append(html);
+	scrollToBottom();
 });
 
 socket.on('newLocationMessage', function (message) {
 	let formattedTime = moment(message.createdAt).format('h:mm a');
 	let template = jQuery('#location-message-template').html();
 	let html = Mustache.render(template, {
-		//text: message.text,
 		from: message.from,
 		url: message.url,
 		createdAt: formattedTime
 	});
 	console.log('message from nlm = ', message);
 	jQuery('#messages').append(html);
-	
-	// var li = jQuery('<li></li>');
-	// var a = jQuery('<a target="_blank">My current location</a>');
-	//
-	// li.text(`${message.from} ${formattedTime}: `);
-	// a.attr('href', message.url);
-	// li.append(a);
-	// jQuery('#messages').append(li);
+	scrollToBottom();
 });
 
 socket.on('welcomeMessage', function (msg) {
@@ -61,9 +68,9 @@ var form = new Vue({
 				text: this.message
 			}, function () {
 				form.message = '';
-				console.log('calling back');
+				//console.log('calling back');
 			});
-			console.log(this.message);
+			//console.log(this.message);
 		}
 	}
 });
