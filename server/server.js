@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
 		// broadcast = send message to all but one user
 		io.emit('newMessage', generateMessage(msg.from, msg.text));
 
-		cb('This is from the server...');
+		cb();
 	});
 
 	socket.on('createLocationMessage', (coords) => {

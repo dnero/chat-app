@@ -1,6 +1,5 @@
 var socket = io();
 
-// listen for these events to be emitted
 socket.on('connect', function () {
 	console.log('[index.html] Connected to server...');
 });
@@ -36,7 +35,6 @@ socket.on('newUserJoined', function (msg) {
 	console.log(msg.text + ' at ' + msg.createdAt.toString());
 });
 
-
 var form = new Vue({
 	el: '#message-form',
 	data: {
@@ -48,7 +46,8 @@ var form = new Vue({
 				from: 'User',
 				text: this.message
 			}, function () {
-
+				form.message = '';
+				console.log('calling back');
 			});
 			console.log(this.message);
 		}
@@ -61,13 +60,18 @@ locationButton.on('click', function () {
 		return alert('Geolocation not supported by your browser');
 	}
 
+	locationButton.attr('disabled', 'disabled').text('Sending location...');
+
 	navigator.geolocation.getCurrentPosition(function (position) {
+		locationButton.removeAttr('disabled').text('Send location');
+
 		socket.emit('createLocationMessage', {
 			latitude: position.coords.latitude,
 			longitude: position.coords.longitude
 		});
 		
 	}, function () {
+		locationButton.removeAttr('disabled').text('Send location');
 		alert('Unable to fetch location');
 	});
 });
