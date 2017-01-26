@@ -27,7 +27,6 @@ let users = new Users();
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
-	console.log('[server.js] New user connected...');
 
 	socket.on('join', (params, callback) => {
 		if (!isRealString(params.name) || !isRealString(params.room)) {
@@ -47,15 +46,21 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('createMessage', (msg, cb) => {
-		console.log('createMessage', msg);
+		let user = users.getUser(socket.id)[0];
 
-		io.emit('newMessage', generateMessage(msg.from, msg.text));
-
+		if (user && isRealString(msg.text)) {
+			io.to(user.room).emit('newMessage', generateMessage(user.name, msg.text));
+		}
+console.log(msg, user);
 		cb();
 	});
 
 	socket.on('createLocationMessage', (coords) => {
-		io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+		let user = users.getUser(socket.id)[0];
+
+		if (user) {
+			io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+		}
 	});
 	
 	socket.on('disconnect', () => {

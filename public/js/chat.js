@@ -61,17 +61,8 @@ socket.on('newLocationMessage', function (message) {
 		url: message.url,
 		createdAt: formattedTime
 	});
-	console.log('message from nlm = ', message);
 	jQuery('#messages').append(html);
 	scrollToBottom();
-});
-
-socket.on('newMessage', function (msg) {
-	console.log(msg.text + ' at ' + msg.createdAt.toString());
-});
-
-socket.on('newMessage', function (msg) {
-	console.log(msg.text + ' at ' + msg.createdAt.toString());
 });
 
 var form = new Vue({
@@ -82,13 +73,10 @@ var form = new Vue({
 	methods: {
 		sendMessage: function () {
 			socket.emit('createMessage', {
-				from: 'User',
 				text: this.message
 			}, function () {
 				form.message = '';
-				//console.log('calling back');
 			});
-			//console.log(this.message);
 		}
 	}
 });
