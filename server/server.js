@@ -3,6 +3,9 @@ const express = require('express');
 const socketIO = require('socket.io');
 
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+const {isRealString} = require('./utils/validation');
+const {Users} = require('./utils/users');
+
 const http = require('http');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -11,21 +14,41 @@ const port = process.env.PORT || 3000;
 let app = express();
 let server = http.createServer(app);
 let io = socketIO(server);
+let users = new Users();
+
+// socket.emit = emits an event to a single user (connection)
+// io.emit = emits an event to all connections
+// io.to('Room Name').emit = emits an event to all users in a specific room
+// socket.broadcast.emit = send message to all but self
+// socket.broadcast.to('Room Name').emit = send message to all but self
+// socket.join = joins a room
+// socket.leave = leaves a specific room
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
 	console.log('[server.js] New user connected...');
 
-	socket.emit('welcomeMessage', generateMessage('Admin', 'Welcome to the chat app.'));
-	
-	socket.broadcast.emit('newUserJoined', generateMessage('Admin', 'New user joined.'));
+	socket.on('join', (params, callback) => {
+		if (!isRealString(params.name) || !isRealString(params.room)) {
+			return callback('Name and room name are required.');
+		}
+
+		socket.join(params.room);
+		users.removeUser(socket.id); // remove user from any previous rooms
+		users.addUser(socket.id, params.name, params.room); // add user to specified room
+
+		io.to(params.room).emit('updateUserList', users.getUserList(params.room)); // emit an event to everyone in the room
+
+		socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app.'));
+		socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
+
+		callback();
+	});
 
 	socket.on('createMessage', (msg, cb) => {
 		console.log('createMessage', msg);
-		// socket.emit = emits an event to a single connection
-		// io.emit = emits an event to all connections
-		// broadcast = send message to all but one user
+
 		io.emit('newMessage', generateMessage(msg.from, msg.text));
 
 		cb();
@@ -36,7 +59,12 @@ io.on('connection', (socket) => {
 	});
 	
 	socket.on('disconnect', () => {
-		console.log('[server.js] User was disconnected...');
+		let user = users.removeUser(socket.id); // remove current user
+
+		if (user) {
+			io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+			io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left...`));
+		}
 	});
 });
 
